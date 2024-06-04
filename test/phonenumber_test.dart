@@ -44,6 +44,20 @@ void main() {
       expect(country.regionCode, "1481");
     });
 
+    test('look up Isle of Man as a country code', () {
+      Country country = PhoneNumber.getCountry("+441624960194");
+      expect(country.name, "Isle of Man");
+      expect(country.code, "IM");
+      expect(country.regionCode, "1624");
+    });
+
+    test('look up Jersey as a country code', () {
+      Country country = PhoneNumber.getCountry("+441543960194");
+      expect(country.name, "Jersey");
+      expect(country.code, "JE");
+      expect(country.regionCode, "1543");
+    });
+
     test('create with empty complete number', () {
       PhoneNumber phoneNumber = PhoneNumber.fromCompleteNumber(completeNumber: "");
       expect(phoneNumber.countryISOCode, "");

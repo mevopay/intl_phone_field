@@ -2760,6 +2760,7 @@ const List<Country> countries = [
     dialCode: "44",
     minLength: 6,
     maxLength: 6,
+    regionCode: '1481',
   ),
   Country(
     name: "Guinea",
@@ -3256,6 +3257,7 @@ const List<Country> countries = [
     dialCode: "44",
     minLength: 6,
     maxLength: 6,
+    regionCode: '1624',
   ),
   Country(
     name: "Israel",
@@ -3411,6 +3413,7 @@ const List<Country> countries = [
     dialCode: "44",
     minLength: 6,
     maxLength: 6,
+    regionCode: '1543',
   ),
   Country(
     name: "Jordan",

@@ -18,8 +18,12 @@ class PhoneNumber {
   });
 
   factory PhoneNumber.fromCompleteNumber({required String completeNumber}) {
-    if (completeNumber == "") {
-      return PhoneNumber(countryISOCode: "", countryCode: "", number: "");
+    if (completeNumber == '') {
+      return PhoneNumber(
+        countryISOCode: '',
+        countryCode: '',
+        number: '',
+      );
     }
 
     try {
@@ -31,12 +35,19 @@ class PhoneNumber {
         number = completeNumber.substring(country.dialCode.length + country.regionCode.length);
       }
       return PhoneNumber(
-          countryISOCode: country.code, countryCode: country.dialCode + country.regionCode, number: number);
+        countryISOCode: country.code,
+        countryCode: country.dialCode + country.regionCode,
+        number: number,
+      );
     } on InvalidCharactersException {
       rethrow;
       // ignore: unused_catch_clause
     } on Exception catch (e) {
-      return PhoneNumber(countryISOCode: "", countryCode: "", number: "");
+      return PhoneNumber(
+        countryISOCode: '',
+        countryCode: '',
+        number: '',
+      );
     }
   }
 

@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl_phone_field/country_picker_dialog.dart';
-import 'package:intl_phone_field/helpers.dart';
 
 import './countries.dart';
 import './phone_number.dart';
@@ -49,7 +48,7 @@ class IntlPhoneField extends StatefulWidget {
   /// By default, the validator checks whether the input number length is between selected country's phone numbers min and max length.
   /// If `disableLengthCheck` is not set to `true`, your validator returned value will be overwritten by the default validator.
   /// But, if `disableLengthCheck` is set to `true`, your validator will have to check phone number length itself.
-  final FutureOr<String?> Function(PhoneNumber?)? validator;
+  final String? Function(String? phoneNumber, String countryCode, String countryISOCode)? validator;
 
   /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType keyboardType;
@@ -335,24 +334,6 @@ class _IntlPhoneFieldState extends State<IntlPhoneField> {
         number = number.replaceFirst(RegExp("^${_selectedCountry.fullCountryCode}"), "");
       }
     }
-
-    if (widget.autovalidateMode == AutovalidateMode.always) {
-      final initialPhoneNumber = PhoneNumber(
-        countryISOCode: _selectedCountry.code,
-        countryCode: '+${_selectedCountry.dialCode}',
-        number: widget.initialValue ?? '',
-      );
-
-      final value = widget.validator?.call(initialPhoneNumber);
-
-      if (value is String) {
-        validatorMessage = value;
-      } else {
-        (value as Future).then((msg) {
-          validatorMessage = msg;
-        });
-      }
-    }
   }
 
   Future<void> _changeCountry() async {
@@ -421,20 +402,29 @@ class _IntlPhoneFieldState extends State<IntlPhoneField> {
         );
 
         if (widget.autovalidateMode != AutovalidateMode.disabled) {
-          validatorMessage = await widget.validator?.call(phoneNumber);
+          validatorMessage = widget.validator?.call(
+            value,
+            _selectedCountry.code,
+            _selectedCountry.fullCountryCode,
+          );
         }
 
         widget.onChanged?.call(phoneNumber);
       },
       validator: (value) {
-        if (value == null || !isNumeric(value)) return validatorMessage;
-        if (!widget.disableLengthCheck) {
+        validatorMessage = widget.validator?.call(
+          value,
+          _selectedCountry.code,
+          _selectedCountry.fullCountryCode,
+        );
+
+        if (validatorMessage != null) return validatorMessage;
+
+        if (value != null && !widget.disableLengthCheck) {
           return value.length >= _selectedCountry.minLength && value.length <= _selectedCountry.maxLength
               ? null
               : widget.invalidNumberMessage;
         }
-
-        return validatorMessage;
       },
       maxLength: widget.disableLengthCheck ? null : _selectedCountry.maxLength,
       keyboardType: widget.keyboardType,

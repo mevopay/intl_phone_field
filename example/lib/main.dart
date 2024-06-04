@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/phone_number.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,7 +14,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   GlobalKey<FormState> _formKey = GlobalKey();
-
+  bool submitted = false;
   FocusNode focusNode = FocusNode();
 
   @override
@@ -31,18 +33,12 @@ class _MyAppState extends State<MyApp> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 SizedBox(height: 30),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Name',
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                TextField(
+                TextFormField(
+                  autovalidateMode: submitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  validator: (val) {
+                    if (val == null || val.isEmpty) return 'Email is required';
+                    return null;
+                  },
                   decoration: InputDecoration(
                     labelText: 'Email',
                     border: OutlineInputBorder(
@@ -54,13 +50,36 @@ class _MyAppState extends State<MyApp> {
                   height: 10,
                 ),
                 IntlPhoneField(
+                  autovalidateMode: submitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   focusNode: focusNode,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'[0-9]'),
+                    ),
+                    FilteringTextInputFormatter.deny(
+                      RegExp(r'^0+'),
+                    ),
+                  ],
                   decoration: InputDecoration(
                     labelText: 'Phone Number',
                     border: OutlineInputBorder(
                       borderSide: BorderSide(),
                     ),
                   ),
+                  validator: (String? phoneNumber, String countryISOCode, String countryCode) {
+                    if (phoneNumber == null || phoneNumber.isEmpty) return 'Phone number is required';
+                    try {
+                      if (!PhoneNumber(
+                        number: phoneNumber,
+                        countryCode: countryCode,
+                        countryISOCode: countryISOCode,
+                      ).isValidNumber()) return 'Please enter a valid mobile number';
+                    } catch (_) {
+                      return 'Please enter a valid mobile number';
+                    }
+                    return null;
+                  },
                   languageCode: "en",
                   onChanged: (phone) {
                     print(phone.completeNumber);
@@ -78,6 +97,9 @@ class _MyAppState extends State<MyApp> {
                   textColor: Colors.white,
                   onPressed: () {
                     _formKey.currentState?.validate();
+                    setState(() {
+                      submitted = true;
+                    });
                   },
                 ),
               ],
